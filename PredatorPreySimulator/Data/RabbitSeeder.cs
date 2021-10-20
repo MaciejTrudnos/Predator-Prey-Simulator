@@ -6,26 +6,26 @@ using System.Text;
 
 namespace PredatorPreySimulator.Data
 {
-    public class FoxSeeder : Seeder
+    public class RabbitSeeder : Seeder
     {
         private int _initialDataCount { get; set; }
-        private int _boundaryX  { get; set; }
+        private int _boundaryX { get; set; }
         private int _boundaryY { get; set; }
 
-        public FoxSeeder(int initialDataCount, int boundaryX, int boundaryY)
+        public RabbitSeeder(int initialDataCount, int boundaryX, int boundaryY)
         {
             _initialDataCount = initialDataCount;
             _boundaryX = boundaryX;
             _boundaryY = boundaryY;
         }
 
-        public List<Fox> Init()
+        public List<Rabbit> Init()
         {
-            var foxes = new List<Fox>();
-            
+            var foxes = new List<Rabbit>();
+
             for (int i = 0; i < _initialDataCount; i++)
             {
-                var fox = new Fox
+                var fox = new Rabbit
                 {
                     Id = i,
                     Move = GenerateMove(),

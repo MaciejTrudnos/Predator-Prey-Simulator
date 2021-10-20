@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PredatorPreySimulator.Model
 {
-    public class Fox
+    public class Rabbit
     {
         public int Id { get; set; }
         public Move Move { get; set; }
