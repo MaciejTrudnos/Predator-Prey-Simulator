@@ -7,7 +7,7 @@ namespace PredatorPreySimulator.Model
 {
     public class Rabbit
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Move Move { get; set; }
         public Gender Gender { get; set; }
         public Generation Generation { get; set; }

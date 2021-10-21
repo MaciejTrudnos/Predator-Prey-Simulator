@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PredatorPreySimulator.Data;
@@ -22,8 +23,8 @@ namespace PredatorPreySimulator
         private int initialFoxDataCount = 0;
         private int initialRabbitDataCount = 0;
 
-        private readonly int _boundaryX = 620;
-        private readonly int _boundaryY = 420;
+        private readonly int _boundaryX = 600;
+        private readonly int _boundaryY = 400;
 
         private List<Fox> _foxes { get; set; }
         private List<Rabbit> _rabbits { get; set; }
@@ -31,7 +32,7 @@ namespace PredatorPreySimulator
         public Form1()
         {
             InitializeComponent();
-            
+
             Text = "Symulacja zjawiska drapieżnik-ofiara dla dwóch populacji";
         }
 
@@ -40,7 +41,10 @@ namespace PredatorPreySimulator
             if (!start)
                 return;
 
-            foreach (var fox in _foxes)
+            var foxes = _foxes.Where(x => x.IsAlive == true)
+                .ToList();
+
+            foreach (var fox in foxes)
             {
                 var solidBrush = new SolidBrush(Color.Red);
                 e.Graphics.FillRectangle(solidBrush, fox.PositionX, fox.PositionY, 10, 10);
@@ -65,11 +69,11 @@ namespace PredatorPreySimulator
 
             stopWatch.Start();
 
-            _foxes = new FoxSeeder(initialFoxDataCount, _boundaryX, _boundaryY)
-                .Init();
+            _foxes = new Seeder(initialFoxDataCount, _boundaryX, _boundaryY)
+                .InitFoxes();
             
-            _rabbits = new RabbitSeeder(initialRabbitDataCount, _boundaryX, _boundaryY)
-                .Init();
+            _rabbits = new Seeder(initialRabbitDataCount, _boundaryX, _boundaryY)
+                .InitRabbits();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -92,79 +96,48 @@ namespace PredatorPreySimulator
                 
                 if (fox.Move == Enum.Move.Right)
                 {
-                    if(fox.PositionX < _boundaryX)
+                    if(fox.PositionX > _boundaryX)
+                    {
+                        fox.PositionX -= 10;
+                    }
+                    else
                     {
                         fox.PositionX += 10;
                     }
-
-                    if (fox.PositionX >= _boundaryX)
-                    {
-                        fox.PositionX -= 10;
-                        fox.Move = Enum.Move.Left;
-                    }
                     
-                    if (fox.PositionX > _boundaryX)
+                }
+                else if (fox.Move == Enum.Move.Left)
+                {
+                    if(fox.PositionX <= 10)
+                    {
+                        fox.PositionX += 10;
+                    }
+                    else
                     {
                         fox.PositionX -= 10;
-                        fox.Move = Enum.Move.Left;
+
                     }
                 }
-
-                if (fox.Move == Enum.Move.Left)
+                else if (fox.Move == Enum.Move.Up)
                 {
-                    if(fox.PositionX > 0)
-                    {
-                        fox.PositionX -= 10;
-                    }
-
-                    if (fox.PositionX == 0)
-                    {
-                        fox.Move = Enum.Move.Right;
-                    }
-                    
-                    if (fox.PositionX < 0)
-                    {
-                        fox.PositionX = 0;
-                        fox.Move = Enum.Move.Right;
-                    }
-                }
-
-                if (fox.Move == Enum.Move.Up)
-                {
-                    if (fox.PositionY < _boundaryY)
+                    if(fox.PositionY < 10)
                     {
                         fox.PositionY += 10;
                     }
-
-                    if (fox.PositionY >= _boundaryY)
+                    else
                     {
                         fox.PositionY -= 10;
-                        fox.Move = Enum.Move.Down;
                     }
-                    
+                }
+                else
+                {
                     if (fox.PositionY > _boundaryY)
                     {
                         fox.PositionY -= 10;
-                        fox.Move = Enum.Move.Down;
                     }
-                }
-
-                if (fox.Move == Enum.Move.Down)
-                {
-                    if (fox.PositionY > 0)
+                    else
                     {
-                        fox.PositionY -= 10;
-                    }
-
-                    if (fox.PositionY == 0)
-                    {
-                        fox.Move = Enum.Move.Up;
-                    }
-                    
-                    if (fox.PositionY < 0)
-                    {
-                        fox.PositionX = 0;
-                        fox.Move = Enum.Move.Up;
+                        fox.PositionY += 10;
                     }
                 }
             });
@@ -175,84 +148,61 @@ namespace PredatorPreySimulator
 
                 if (rabbit.Move == Enum.Move.Right)
                 {
-                    if (rabbit.PositionX < _boundaryX)
+                    if (rabbit.PositionX > _boundaryX)
+                    {
+                        rabbit.PositionX -= 10;
+                    }
+                    else
                     {
                         rabbit.PositionX += 10;
                     }
 
-                    if (rabbit.PositionX >= _boundaryX)
+                }
+                else if (rabbit.Move == Enum.Move.Left)
+                {
+                    if (rabbit.PositionX <= 10)
                     {
-                        rabbit.PositionX -= 10;
-                        rabbit.Move = Enum.Move.Left;
+                        rabbit.PositionX += 10;
                     }
-
-                    if (rabbit.PositionX > _boundaryX)
+                    else
                     {
                         rabbit.PositionX -= 10;
-                        rabbit.Move = Enum.Move.Left;
+
                     }
                 }
-
-                if (rabbit.Move == Enum.Move.Left)
+                else if (rabbit.Move == Enum.Move.Up)
                 {
-                    if (rabbit.PositionX > 0)
-                    {
-                        rabbit.PositionX -= 10;
-                    }
-
-                    if (rabbit.PositionX == 0)
-                    {
-                        rabbit.Move = Enum.Move.Right;
-                    }
-
-                    if (rabbit.PositionX < 0)
-                    {
-                        rabbit.PositionX = 0;
-                        rabbit.Move = Enum.Move.Right;
-                    }
-                }
-
-                if (rabbit.Move == Enum.Move.Up)
-                {
-                    if (rabbit.PositionY < _boundaryY)
+                    if (rabbit.PositionY < 10)
                     {
                         rabbit.PositionY += 10;
                     }
-
-                    if (rabbit.PositionY >= _boundaryY)
+                    else
                     {
                         rabbit.PositionY -= 10;
-                        rabbit.Move = Enum.Move.Down;
                     }
-
+                }
+                else
+                {
                     if (rabbit.PositionY > _boundaryY)
                     {
                         rabbit.PositionY -= 10;
-                        rabbit.Move = Enum.Move.Down;
                     }
-                }
-
-                if (rabbit.Move == Enum.Move.Down)
-                {
-                    if (rabbit.PositionY > 0)
+                    else
                     {
-                        rabbit.PositionY -= 10;
-                    }
-
-                    if (rabbit.PositionY == 0)
-                    {
-                        rabbit.Move = Enum.Move.Up;
-                    }
-
-                    if (rabbit.PositionY < 0)
-                    {
-                        rabbit.PositionX = 0;
-                        rabbit.Move = Enum.Move.Up;
+                        rabbit.PositionY += 10;
                     }
                 }
             });
 
             KillRabbitInPlace();
+
+            CreateFox();
+
+            CreateRabbit();
+
+            KillOwnFox();
+
+            KillOwnRabbit();
 
             label10.Text = $"{stopWatch.Elapsed.Hours.ToString("00")}:{stopWatch.Elapsed.Minutes.ToString("00")}:{stopWatch.Elapsed.Seconds.ToString("00")}";
 
@@ -310,11 +260,159 @@ namespace PredatorPreySimulator
             }
         }
 
+        private void KillOwnFox()
+        {
+            var rabbits = _rabbits.Where(x => x.IsAlive)
+                .Any();
+
+            if (rabbits)
+                return;
+
+            var foxes = _foxes.Where(x => x.IsAlive == true)
+                .ToList();
+
+            foreach (var f1 in foxes)
+            {
+                foreach (var f2 in foxes)
+                {
+                    if (f1.Id == f2.Id)
+                        continue;
+
+                    var x = f1.PositionX - f2.PositionX;
+                    if (x < 0)
+                        x = f2.PositionX - f1.PositionX;
+
+                    if (Enumerable.Range(0, 10).Contains(x))
+                    {
+                        var y = f1.PositionY - f2.PositionY;
+                        if (y < 0)
+                            y = f2.PositionY - f1.PositionY;
+
+                        if (Enumerable.Range(0, 10).Contains(y))
+                        {
+                            f2.IsAlive = false;
+                            AppendTextToListBox($"{stopWatch.Elapsed.Hours.ToString("00")}:{stopWatch.Elapsed.Minutes.ToString("00")}:{stopWatch.Elapsed.Seconds.ToString("00")} | " + "Zginął lis");
+                        }
+                    }
+                }
+            }
+        }
+
+        private void KillOwnRabbit()
+        {
+            var foxes = _foxes.Where(x => x.IsAlive)
+                .Any();
+
+            if (foxes)
+                return;
+
+            var rabbits = _rabbits.Where(x => x.IsAlive == true)
+                .ToList();
+
+            foreach (var f1 in rabbits)
+            {
+                foreach (var f2 in rabbits)
+                {
+                    if (f1.Id == f2.Id)
+                        continue;
+
+                    var x = f1.PositionX - f2.PositionX;
+                    if (x < 0)
+                        x = f2.PositionX - f1.PositionX;
+
+                    if (Enumerable.Range(0, 10).Contains(x))
+                    {
+                        var y = f1.PositionY - f2.PositionY;
+                        if (y < 0)
+                            y = f2.PositionY - f1.PositionY;
+
+                        if (Enumerable.Range(0, 10).Contains(y))
+                        {
+                            f2.IsAlive = false;
+                            AppendTextToListBox($"{stopWatch.Elapsed.Hours.ToString("00")}:{stopWatch.Elapsed.Minutes.ToString("00")}:{stopWatch.Elapsed.Seconds.ToString("00")} | " + "Zginął królik");
+                        }
+                    }
+                }
+            }
+        }
+
         private void AppendTextToListBox(string text)
         {
             listBox1.Items.Add(text);
             listBox1.SelectedIndex = listBox1.Items.Count - 1;
             listBox1.SelectedIndex = -1;
+        }
+
+        private void CreateFox()
+        {
+            var maleFoxes = _foxes.Where(x => x.Gender == Gender.Male && x.IsAlive == true && x.Generation == Generation.First)
+                .ToList();
+
+            var famaleFoxes = _foxes.Where(x => x.Gender == Gender.Famle && x.IsAlive == true && x.Generation == Generation.First)
+                .ToList();
+
+            foreach (var male in maleFoxes)
+            {
+                foreach (var famle in famaleFoxes)
+                {
+                    var x = male.PositionX - famle.PositionX;
+                    if (x < 0)
+                        x = famle.PositionX - male.PositionX;
+
+                    if (Enumerable.Range(0, 10).Contains(x))
+                    {
+                        var y = male.PositionY - famle.PositionY;
+                        if (y < 0)
+                            y = famle.PositionY - male.PositionY;
+
+                        if (Enumerable.Range(0, 10).Contains(y))
+                        {
+                            var newFox = new Seeder(famle.PositionX, famle.PositionY)
+                                .CreateFox();
+                            
+                            _foxes.Add(newFox);
+                            
+                            AppendTextToListBox($"{stopWatch.Elapsed.Hours.ToString("00")}:{stopWatch.Elapsed.Minutes.ToString("00")}:{stopWatch.Elapsed.Seconds.ToString("00")} | " + "Nowy lis");
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CreateRabbit()
+        {
+            var maleRabbits = _rabbits.Where(x => x.Gender == Gender.Male && x.IsAlive == true && x.Generation == Generation.First)
+                .ToList();
+
+            var famaleRabbits = _rabbits.Where(x => x.Gender == Gender.Famle && x.IsAlive == true && x.Generation == Generation.First)
+                .ToList();
+
+            foreach (var male in maleRabbits)
+            {
+                foreach (var famle in famaleRabbits)
+                {
+                    var x = male.PositionX - famle.PositionX;
+                    if (x < 0)
+                        x = famle.PositionX - male.PositionX;
+
+                    if (Enumerable.Range(0, 10).Contains(x))
+                    {
+                        var y = male.PositionY - famle.PositionY;
+                        if (y < 0)
+                            y = famle.PositionY - male.PositionY;
+
+                        if (Enumerable.Range(0, 10).Contains(y))
+                        {
+                            var newRabbit = new Seeder(famle.PositionX, famle.PositionY)
+                                .CreateRabbit();
+                            
+                            _rabbits.Add(newRabbit);
+                            
+                            AppendTextToListBox($"{stopWatch.Elapsed.Hours.ToString("00")}:{stopWatch.Elapsed.Minutes.ToString("00")}:{stopWatch.Elapsed.Seconds.ToString("00")} | " + "Nowy królik");
+                        }
+                    }
+                }
+            }
         }
 
         #region UIMethod
